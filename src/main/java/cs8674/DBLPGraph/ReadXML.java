@@ -1,58 +1,34 @@
 package cs8674.DBLPGraph;
 
-import java.io.File;
+
 /*********************************************************
- * Prerequisite: MongoDB local instance to be installed 
- *               on the system.
  * This class is used to parse the dblp.xml data
  *********************************************************/
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.concurrent.TimeUnit;
-
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-
-import org.neo4j.commandline.arguments.common.Database;
-import org.neo4j.driver.v1.Driver;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.graphdb.ResourceIterator;
-import org.neo4j.graphdb.Transaction;
-import org.neo4j.graphdb.factory.GraphDatabaseFactory;
-import org.neo4j.graphdb.index.IndexHits;
-import org.neo4j.graphdb.schema.IndexDefinition;
-import org.neo4j.graphdb.schema.Schema;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
-import org.neo4j.graphdb.index.IndexManager;
 import org.neo4j.graphdb.index.RelationshipIndex;
-
 import cs8674.core.Article;
-import cs8674.core.Author;
-import cs8674.core.Conference;
-//import msd.front.end.interfaces.DataReader;
 
 public class ReadXML extends DefaultHandler {
 
 	Article article;
 	String text;
 	static boolean hasArticle = false;
-	private static final File DB_PATH = new File( "/home/harshita/dblp-index-4" );
+	//private static final File DB_PATH = new File( "/home/harshita/dblp-index-4" );
 	GraphDatabaseService graphDb;
 	public DatabaseCreator dbCreator1;
 	RelationshipIndex citations;
-	private  enum RelTypes implements RelationshipType
+/*	private  enum RelTypes implements RelationshipType
 	{
 		CITES
 	}
-	/**
+*/	/**
 	 * The default constructor
 	 * @throws IOException 
 	 */
@@ -84,9 +60,7 @@ public class ReadXML extends DefaultHandler {
 	//	this.citations = dbCreator.getRelIndex();	
 	}
 
-/*	public void getCitedBy(){
-		dbCreator1.getCitedBy("conf/pods/ChomickiK95");
-	}*/
+
 	public void parseXML(String xmlPath) throws SAXException, IOException, ParserConfigurationException {
 		SAXParserFactory spfac = SAXParserFactory.newInstance();
 
@@ -100,7 +74,6 @@ public class ReadXML extends DefaultHandler {
 		//Finally, tell the parser to parse the input and notify the handler
 		sp.parse(xmlPath, handler);
 		handler.closeInserter();
-		//handler.getCitedBy();
 	}
 
 	/*
@@ -121,7 +94,6 @@ public class ReadXML extends DefaultHandler {
 	public void startElement(String uri, String localName,
 			String qName, Attributes attributes) throws SAXException {
 		if  ("inproceedings".equalsIgnoreCase(qName)|| "article".equalsIgnoreCase(qName)) {
-			//System.out.println("found:::here");
 			setHasArticle(true);
 			article = new Article();
 			article.setKey(attributes.getValue("key"));
@@ -154,7 +126,7 @@ public class ReadXML extends DefaultHandler {
 	public void checkHasArticle(String uri, String localName, String qName) throws IOException {
 		if ( "inproceedings".equalsIgnoreCase(qName) || "article".equalsIgnoreCase(qName)) {
 			setHasArticle(false);
-		//	putInDb();
+			// call the database creator
 			dbCreator1.createGraph(article);
 
 		} else if(hasArticle){
