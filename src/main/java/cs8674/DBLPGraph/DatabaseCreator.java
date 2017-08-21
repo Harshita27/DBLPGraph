@@ -5,23 +5,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.graphdb.ResourceIterator;
-import org.neo4j.graphdb.Transaction;
-import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.graphdb.index.IndexHits;
-import org.neo4j.graphdb.schema.IndexDefinition;
-import org.neo4j.graphdb.schema.Schema;
 import org.neo4j.helpers.collection.MapUtil;
-import org.neo4j.io.fs.DefaultFileSystemAbstraction;
 import org.neo4j.io.fs.FileUtils;
-import org.neo4j.kernel.internal.StoreLocker;
 import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserters;
 import org.neo4j.unsafe.batchinsert.BatchInserterIndexProvider;
@@ -30,15 +19,33 @@ import org.neo4j.index.lucene.unsafe.batchinsert.LuceneBatchInserterIndexProvide
 
 import cs8674.core.Article;
 
+
+/*********************************************************************************
+ * 
+ * @author harshita
+ * This class calls the neo4j batch inserter to insert the created article
+ * objects into the neo4j database. The conferences, articles and authors
+ * are all nodes that are created and are related based on the following relations:
+ * [Conf] -publishes- [Article] -has- [Author]
+ * 
+ * Relationship properties that exist:
+ * 1. artcileCount: between [Author]  -  [Author], gives the total articles 
+ *    published together by the two authors
+ * 2. authorPair: between [Author]  -  [Author], used to identify the coauthors
+  **********************************************************************************/
 public class DatabaseCreator {
+	// path where you want to store your database
 	private static final File DB_PATH = new File( "/home/ec2-user/dbCoAuthorImp" );
 	static ArrayList<String> visitedCites = new ArrayList<String>();
 	GraphDatabaseService graphDb;
 	BatchInserter inserter;
+
+	// batch inserts use lucene indexing for easy updation and insertion
 	BatchInserterIndex index;
 	BatchInserterIndex relIndex;
 	BatchInserterIndexProvider lucene;
-	//static RelationshipIndex citations ;
+
+	// relationship types 
 	private  enum RelTypes implements RelationshipType
 	{ 
 		CITES,
@@ -47,6 +54,8 @@ public class DatabaseCreator {
 		PUBLISHES
 	}
 	Map<String, Object> confRelProp = new HashMap<String, Object>();
+
+
 	/*****************************************************
 	 * The constructor that initializes the batch inserter
 	 * and the indexer
@@ -57,9 +66,7 @@ public class DatabaseCreator {
 
 		inserter = BatchInserters.inserter( DB_PATH );
 		lucene = new LuceneBatchInserterIndexProvider(inserter);
-		//graphDb = new GraphDatabaseFactory().newEmbeddedDatabase( DB_PATH );
 		createIndexOnNode();
-		//createIndexOnRelation();
 	}
 
 	/*******************************************************
@@ -80,62 +87,56 @@ public class DatabaseCreator {
 	public long addNodeToGraph(Article article, long confId) {
 		Label label = Label.label( "author" );
 
-
 		// if node exists then create new relationships to the co -authors
 		long authorsId = nodeExists(article);
 		if(authorsId == Long.MIN_VALUE ) {
-			//	System.out.println("created a new node");
 			Map<String, Object> prop = new HashMap<String, Object>();
 			prop.put("authorName", article.getMainAuthor());
 			authorsId = inserter.createNode( prop, label );
 			index.add(authorsId, prop);
 			index.flush();
-			//System.out.println("Inserted:"+ article.getMainAuthor());
-		} /*else {
-			inserter.setNodeProperties(authorsId, prop);
-		}*/
+		} 
 
+		// if there are more than one authors for an article, create co-authors
 		if(!article.getAuthor().isEmpty())
 		{
-			//Label labelForCoAuth = Label.label( "author" );
-			//System.out.println("co author creation:");
 			for(String coAuthors: article.getAuthor()){
-				//System.out.println("auth:"+ coAuthors);	
 				createRelatedNode(authorsId, coAuthors, article.getMainAuthor(), confId);
 			}
-			//	inserter.setNodeLabels(authorsId, label, labelForCoAuth);
-
 		}
-
-
-		
 		return authorsId;
 	}
 
+
+	/*******************************************************
+	 * Helper method to check if a node exists in the graph 
+	 * @param article
+	 * @return
+	 ********************************************************/
 	public long nodeExists(Article article) {
 		IndexHits<Long> authorExists= index.get("authorName", article.getMainAuthor());
-		//	IndexHits<Long> citeExists= index.get("key", article.getKey());
 		// if there are nodes that exist with the same key as the cited article
 		if(authorExists.size() != 0 ){ 
 			return authorExists.getSingle();
-		} /*else if(citeExists.size() != 0) {
-			return citeExists.getSingle();
-		} */else return Long.MIN_VALUE;
+		} 
+		else return Long.MIN_VALUE;
 	}
 
 	/*********************************************************
-	 * 
+	 * Helper method used to update the relationship properties
+	 * of two co authors, based on the number of articles they 
+	 * published together
 	 * @param relProp
 	 ********************************************************/
 	public Map<String, Object> updateProperties(Map<String, Object> relProp) {
-		//	System.out.println("author pair:"+ relProp.get("authorPair"));
 		int count = (int)relProp.get("articleCount");
 		relProp.put("articleCount", count+1);
 		return relProp;
 	}
 
 	/*********************************************************
-	 * 
+	 * Method to create a co author node if doesnt exist or
+	 * update the relationship if co author exists
 	 * @param authorId
 	 * @param coAuthor
 	 * @param mainAuthor
@@ -143,47 +144,35 @@ public class DatabaseCreator {
 	public void createRelatedNode(long authorId, String coAuthor, String mainAuthor, long confId) {
 		long relId = Long.MIN_VALUE;
 		Label labelForCoAuth = Label.label( "author" );
-		//	Label label = Label.label( "articleKey" );
 		String authorPair = mainAuthor+"--"+coAuthor;
-		//System.out.println("author pair:"+ authorPair);
-
-
+		
 		Map<String, Object> relProp =null;
 		IndexHits<Long> authorExists= index.get("authorName",coAuthor);
 		IndexHits<Long> relExists= relIndex.get("authorPair", authorPair);
 		try {
-
+			// if coauthor relation exists in the graph update the properties
 			if(relExists.size() != 0) {
 
 				long id = relExists.getSingle();
-				//for(long id: relExists) {
 				relProp = inserter.getRelationshipProperties(id);
 				relProp = updateProperties(relProp);
-				/*for(String propt: relProp.keySet()){
-					System.out.println("properties updated to:"+ relProp.get(propt));
-				}*/
-
 				relId = id;
 				inserter.setRelationshipProperties(relId, relProp);
 				relIndex.updateOrAdd(relId, relProp);
-				//relIndex.flush();
-				//}
-			} else if(authorExists.size() != 0 ) {
+				
+			} 
+			// else create a new relationship if the node exists but relation doesnt
+			else if(authorExists.size() != 0 ) {
 				relProp = new HashMap<String, Object>();
 				relProp.put("authorPair", authorPair);
 				relProp.put("articleCount", 1);
 				long id = authorExists.getSingle();
-				//	for(long id: authorExists) {
 				relId = inserter.createRelationship(authorId, id, RelTypes.CO_AUTHOR, relProp );
 				relIndex.add(relId, relProp);
-				//inserter.setNodeLabels(id, labelForCoAuth);
-				//	long confRelId = 
 				inserter.createRelationship(confId,id, RelTypes.HAS, confRelProp);
-				//relIndex.updateOrAdd(relId, relProp);
-				//	relIndex.updateOrAdd(confRelId, confRelProp);
-				//	relIndex.flush();
-				//	}
+
 			}
+			// else create new node and relation
 			else {
 				Map<String, Object> prop = new HashMap<String, Object>();
 				prop.put("authorName", coAuthor);
@@ -194,38 +183,34 @@ public class DatabaseCreator {
 				relProp.put("articleCount", 1);
 				index.flush();
 				relId = inserter.createRelationship(authorId, coAuthorNode, RelTypes.CO_AUTHOR, relProp );
-				//	long confRelId =
 				inserter.createRelationship(confId,coAuthorNode, RelTypes.HAS, confRelProp);
 				relIndex.add(relId, relProp);
-
-				//			/relIndex.updateOrAdd(confRelId, confRelProp);
-				//	relIndex.flush();
-			}
+				}
 		}
 		finally {
 			relExists.close();
 			authorExists.close();
 		}
-
-		
 		relIndex.flush();
 
 	}
 
 
+	/*********************************************************
+	 * Method to create an article node from the parsed xml
+	 * @param article
+	 * @return
+	 *********************************************************/
 	public long addArticleNode(Article article) {
 		Label label = Label.label( "article" );
-
 		long articleId = Long.MIN_VALUE;
-
 		IndexHits<Long> articleExists= index.get("key",article.getKey());
 
 		try{
 			if(articleExists.size() != 0) {
-				//	for(long id: articleExists) {
 				articleId = articleExists.getSingle();
-				//	}
 			}
+			// create new article node with node properties as title, key and year
 			else {
 				Map<String, Object> prop = new HashMap<String, Object>();
 				prop.put("title", article.getTitle());
@@ -234,32 +219,34 @@ public class DatabaseCreator {
 				articleId =	inserter.createNode(prop, label);
 				index.add(articleId, prop);
 				index.flush();
-
-				//return confId;
 			}
 		}
 		finally {
 			articleExists.close();
 		}
-		
+
 		return articleId;
 	}
 
 
+	
+	/**********************************************************
+	 * Method to add a conference as a node into the graph
+	 * @param key
+	 * @return
+	 *********************************************************/
 	public long addConfNode(String key) {
 		String[] confName = key.split("/");
+		// conf name is extracted from the article's key
 		Label label = Label.label( "confName" );
-
-		//System.out.println("conf:"+ confName[1]);
 		long confId = Long.MIN_VALUE;
 
 		IndexHits<Long> confExists= index.get("confName",confName[1]);
 		try {
 			if(confExists.size() != 0) {
-				//for(long id: confExists) {
 				confId = confExists.getSingle();
-				//}
 			}
+			// if node already doesnt exist then create a new node and add properties
 			else {
 				Map<String, Object> prop = new HashMap<String, Object>();
 				prop.put("confName", confName[1]);
@@ -272,7 +259,7 @@ public class DatabaseCreator {
 		finally{
 			confExists.close();
 		}
-		
+
 		return confId;
 	}
 
@@ -289,11 +276,10 @@ public class DatabaseCreator {
 		// add conf node  to the graph
 		long actualConfId = addConfNode(article.getKey());
 		long confId = addArticleNode(article);
-
+		
+		// add relation between conference and article
 		inserter.createRelationship(actualConfId,confId, RelTypes.PUBLISHES, confRelProp);
 
-
-		//System.out.println("conference id:"+ confId);
 		// add author node  to the graph
 		authorId = addNodeToGraph(article, confId);
 
@@ -301,7 +287,8 @@ public class DatabaseCreator {
 		inserter.createRelationship(confId,authorId, RelTypes.HAS, confRelProp);
 
 
-
+		// for each of the citations given by this article, create new article nodes or
+		// update existing ones based on article key
 		for(String cite: article.getCite()) {
 			long confRelId = Long.MIN_VALUE;
 			// filter out the empty citations
@@ -321,26 +308,21 @@ public class DatabaseCreator {
 					else {
 						long citeConfId = addConfNode(cite);
 						citedId = inserter.createNode(prop, label);
+						// create relation between conf and article
 						confRelId=	inserter.createRelationship(citeConfId, citedId, RelTypes.PUBLISHES, confRelProp );
-						//	relIndex.updateOrAdd(confRelId, confRelProp);
 						index.add(citedId, prop);
 						index.flush();
-						/*long relId = inserter.createRelationship(confId, citedId, RelTypes.CITES, prop );
-					relIndex.updateOrAdd(relId, prop);*/
 					}
-					// create relation between the parent article and the cited article
 				}
 				finally {
 					citeExists.close();
 				}
-				long relId = inserter.createRelationship(confId, citedId, RelTypes.CITES, prop);
-				//index.updateOrAdd(citedId, prop);
-				//relIndex.updateOrAdd(relId, prop);
 				
+				// create relation between two articles based on the citation
+				long relId = inserter.createRelationship(confId, citedId, RelTypes.CITES, prop);
 				relIndex.flush();
 			}
 		}
-		//	return true;
 	}
 
 	public void closeInserter() {
