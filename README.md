@@ -3,6 +3,13 @@
 Environment used to build the project: JDK 1.8 , JAVA v.8<br>
 Pre-requisite: Java Development Environment, Maven, neo4j 3.2.0<br> <br>
 
+<h2>Project structure</h2>
+src/main
+
+ |_ core: contains the core classes used to encapsulate the parsed xml information
+ 
+ |_ dblpgraph: contains the application logic to create a neo4j database and traverse it
+ 
 <h2> What is Neo4j? </h2>
 Neo4j is a graph database management system developed by Neo Technology, Inc. Described by its developers as an ACID-compliant transactional database with native graph storage and processing, Neo4j is the most popular graph database according to db-engines.com.
 
@@ -11,6 +18,8 @@ For each article, the application parses the information to get the conference, 
 it is essential to get a relationship between all these sets of information in order to analyze and visualize an authors conrtribution.
 Each of the information is modeled into nodes and properties.
 It is very important to model the data right in order to achieve max throughput from the neo4j engine.
+
+
 This application creates the following nodes:
 1. Conference Node: conference where an article was published
 2. Article node: The article under concern
