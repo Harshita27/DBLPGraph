@@ -8,9 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
-
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
@@ -25,7 +23,14 @@ import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserterIndex;
 import org.neo4j.unsafe.batchinsert.BatchInserterIndexProvider;
 
+/************************************************************************
+ * 
+ * @author harshita
+ * This is a helper class that can be used to traverse the entire
+ * graph db hosted on the ec2 isntance. There are sample queries that can be fired.
+ *************************************************************************/
 public class TraverseGraph {
+	
 	private static GraphDatabaseService db;
 	private static TraversalDescription friendsTraversal;
 	private static final File DB_PATH = new File( "/home/ec2-user/dbCoAuthorImp" );
@@ -43,6 +48,10 @@ public class TraverseGraph {
 	long idSec;
 
 
+	/**
+	 * Default constructor
+	 * @throws IOException
+	 */
 	TraverseGraph () throws IOException {
 		db = new GraphDatabaseFactory().newEmbeddedDatabase( DB_PATH );
 		friendsTraversal = db.traversalDescription()
@@ -53,6 +62,7 @@ public class TraverseGraph {
 	}
 
 
+	// main method
 	public static void main(String[] args) throws IOException {
 		TraverseGraph tg = new TraverseGraph();
 		try ( Transaction tx = db.beginTx	() ) {
@@ -72,18 +82,19 @@ public class TraverseGraph {
 	
 	
 
+	/**************************************************************************
+	 * Method to find all articles that cite a given author
+	 * @param authorName
+	 *************************************************************************/
 	public void findArticleCitationsForAuthor(String authorName) {
 		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`");
 		System.out.println("All articles that cite the author-->"+ authorName);
-
 		try ( Transaction ignored = db.beginTx();
 				Result resultsForAuthor = db.execute("MATCH (a:article)-[:CITES]->(b:article)-[:HAS]->(m) WHERE m.authorName = '"+authorName+"' RETURN DISTINCT a");
 				ResourceIterator<Node> articles= resultsForAuthor.columnAs("a"))
 		{
 			while ( articles.hasNext() )
 			{
-
-
 				Node article = articles.next();
 				if(article.hasProperty("title"))
 				{
@@ -95,18 +106,19 @@ public class TraverseGraph {
 		}
 	}
 
+	/**************************************************************************
+	 * Method to find all articles cited by a given author in his article
+	 * @param authorName
+	 *************************************************************************/
 	public void findArticleCitationsByAuthor(String authorName) {
 		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`");
 		System.out.println("All articles cited by author-->"+ authorName);
-
-
 		try ( Transaction ignored = db.beginTx();
 				Result resultsForAuthor = db.execute("MATCH (a:article)-[:CITES]-(b:article), (a:article)-[:HAS]->(m) WHERE m.authorName = '"+authorName+"' RETURN DISTINCT b");
 				ResourceIterator<Node> articles= resultsForAuthor.columnAs("b"))
 		{
 			while ( articles.hasNext() )
 			{
-
 				Node article = articles.next();
 				if(article.hasProperty("title"))
 				{
@@ -118,18 +130,19 @@ public class TraverseGraph {
 		}
 	}
 
+	/**************************************************************************
+	 * Search all the articles that have been published by a given author
+	 * @param authorName
+	 *************************************************************************/
 	public void searchAllArticlesForAuthor(String authorName) {
 		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`");
 		System.out.println("All articles by "+ authorName);
-
-
 		try ( Transaction ignored = db.beginTx();
 				Result resultsForAuthor = db.execute("MATCH (a:article)-[:HAS]->(m) WHERE m.authorName = '"+authorName+"' RETURN DISTINCT a");
 				ResourceIterator<Node> articles= resultsForAuthor.columnAs("a"))
 		{
 			while ( articles.hasNext() )
 			{
-
 				Node article = articles.next();
 				if(article.hasProperty("title"))
 				{
@@ -142,11 +155,13 @@ public class TraverseGraph {
 	}
 
 
+	/**************************************************************************
+	 * Search all the articles that have the given keyword in their title
+	 * @param articleTitleKeyword
+	 *************************************************************************/
 	public void searchAuthorsByArticleTitle(String articleTitleKeyword) {
 		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`");
 		System.out.println("Articles with title containign the word ---->> " + articleTitleKeyword);
-
-
 		try ( Transaction ignored = db.beginTx();
 				//MATCH (:confName { confName:'"+conf1+"' })-[:PUBLISHES]->(n)-[:HAS]->(m) RETURN DISTINCT m
 				Result resultsConf1 = db.execute("MATCH (a:article)-[:HAS]-(m) WHERE a.title CONTAINS '"+articleTitleKeyword+"' RETURN m");
@@ -272,16 +287,6 @@ public class TraverseGraph {
 				System.out.println(authorsInConf.next());
 			}
 		}
-
-		/*
-		Label label = Label.label( "author" );
-		ResourceIterator<Node> foundNodes = db.findNodes(label, "authorName", authorName);
-		if( foundNodes.hasNext()) {
-			Node myNode = foundNodes.next();
-			System.out.println(traverseAllCoAuths(myNode));
-		}*/
-
-
 	}
 
 

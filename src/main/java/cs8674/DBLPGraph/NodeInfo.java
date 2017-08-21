@@ -19,7 +19,12 @@ import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserterIndex;
 import org.neo4j.unsafe.batchinsert.BatchInserterIndexProvider;
 
-
+/**************************************************************************
+ * 
+ * @author harshita
+ *
+ * Class used to perform adhoc operations on the graph database
+ *************************************************************************/
 public class NodeInfo {
 	private static GraphDatabaseService db;
 	private static final File DB_PATH = new File( "/home/ec2-user/dbCoAuthorImp" );
@@ -42,34 +47,30 @@ public class NodeInfo {
 	}
 
 
+	// main method
 	public static void main(String[] args) throws IOException {
 		NodeInfo tg = new NodeInfo();
 		try ( Transaction ignored = db.beginTx();
 				Result result = db.execute("MATCH () RETURN COUNT(*) AS node_count");	
-		ResourceIterator<Node> articles= result.columnAs("node_count"))
+				ResourceIterator<Node> articles= result.columnAs("node_count"))
 		{
 			while ( articles.hasNext() )
 			{
+				System.out.println("Number of nodes:"+articles.next());
 
-				
-					System.out.println("Number of nodes:"+articles.next());
-				
 			}
 		}
-		
+
 		try ( Transaction ignored = db.beginTx();
-		Result result2 = db.execute("MATCH ()-->() RETURN COUNT(*) AS rel_count");	
-		ResourceIterator<Node> articles= result2.columnAs("rel_count"))
+				Result result2 = db.execute("MATCH ()-->() RETURN COUNT(*) AS rel_count");	
+				ResourceIterator<Node> articles= result2.columnAs("rel_count"))
 		{
 			while ( articles.hasNext() )
-			{
+			{	System.out.println("Number of relationships:"+articles.next());
 
-				
-					System.out.println("Number of relationships:"+articles.next());
-				
 			}
 		}
-		
+
 	}
 }
 
