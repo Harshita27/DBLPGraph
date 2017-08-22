@@ -54,6 +54,8 @@ http://ec2-18-220-59-135.us-east-2.compute.amazonaws.com:7474/browser/
 Query that was run:
 ```MATCH (ca:confName)-[:PUBLISHES]->(b:article)-[:HAS]->(m) WHERE m.authorName = 'Sridhar Ramaswamy' RETURN ca , b, m```
 
+See SampleQueries.txt for cypher queries that you can run on the Neo4j Browser.
+
 <h2>Front end to the graph database</h2>
 The repository https://github.com/Harshita27/AuthorGeneologyUI contains the frontend web app to connect to the ec2 instance and fires up sample queries on the DBLP graph created. This repository lists some example queries that you can run.
 
@@ -66,6 +68,8 @@ It is advised to get the database created in an ec2 instance because of the larg
 java -jar DBLP_GraphCreation.jar /path/tp/dblp/xml 
 
 The application currently creates the database on an ec2 instance, and the database path has been set to that.
+
+The dblp.xml can be found at http://dblp.dagstuhl.de/xml/
 
 2. Database Traversal: Run the jar at Jars/DBLP_GraphTraversal.jar
 
