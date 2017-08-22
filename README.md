@@ -36,9 +36,8 @@ Each node is related to another node by some relationship type:
 The entire graph db is hosted on the ec2 instance. 
 Follow the link to visualize the graph in the neo4j browser: 
 http://ec2-18-220-59-135.us-east-2.compute.amazonaws.com:7474/browser/
-For example, below is a screenshot of how the graph looks for the author "Sridhar Ramaswamy"
 
-[Alt text](/image/image.png?raw=true "Optional Title")
+[Screenshot of how the graph looks for the author "Sridhar Ramaswamy"](/image/image.png?raw=true "Optional Title")
 
 
 
