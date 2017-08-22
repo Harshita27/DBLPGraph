@@ -37,6 +37,17 @@ The entire graph db is hosted on the ec2 instance.
 Follow the link to visualize the graph in the neo4j browser: 
 http://ec2-18-220-59-135.us-east-2.compute.amazonaws.com:7474/browser/
 
+[Screenshot of how the graph looks for the author "Sridhar Ramaswamy"](/image/image.png?raw=true "Optional Title")
+
+
+
 <h2>Front end to the graph database</h2>
 The repository https://github.com/Harshita27/AuthorGeneologyUI contains the frontend web app to connect to the ec2 instance and fires up sample queries on the DBLP graph created.
 
+
+<h2>How to run the application</h2>
+
+1. Database Creation: Create jar with main class as ParseInProceedings.java
+
+2. Database Traversal: Create jar with main class as TraverseGraph.java
+By default these classes have the path set for ec2 instance which can be changed
