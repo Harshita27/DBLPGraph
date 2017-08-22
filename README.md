@@ -49,5 +49,5 @@ The repository https://github.com/Harshita27/AuthorGeneologyUI contains the fron
 
 1. Database Creation: Create jar with main class as ParseInProceedings.java
 
-2. Database Traversal: reate jar with main class as TraverseGraph.java
+2. Database Traversal: Create jar with main class as TraverseGraph.java
 By default these classes have the path set for ec2 instance which can be changed
