@@ -54,7 +54,7 @@ http://ec2-18-220-59-135.us-east-2.compute.amazonaws.com:7474/browser/
 
 
 <h2>Front end to the graph database</h2>
-The repository https://github.com/Harshita27/AuthorGeneologyUI contains the frontend web app to connect to the ec2 instance and fires up sample queries on the DBLP graph created.
+The repository https://github.com/Harshita27/AuthorGeneologyUI contains the frontend web app to connect to the ec2 instance and fires up sample queries on the DBLP graph created. This repository lists some example queries that you can run.
 
 
 <h2>How to run the application</h2>
