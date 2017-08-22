@@ -1,14 +1,26 @@
 # DBLPGraph
 <h2> CONFIGURTION INSTRUCTIONS: </h2>
 Environment used to build the project: JDK 1.8 , JAVA v.8<br>
-Pre-requisite: Java Development Environment, Maven, neo4j 3.2.0<br> <br>
-
+Pre-requisite: Java Development Environment, Maven, neo4j 3.2.0
 <h2>Project structure</h2>
 src/main
 
  |_ core: contains the core classes used to encapsulate the parsed xml information
  
  |_ dblpgraph: contains the application logic to create a neo4j database and traverse it
+ 
+<h2> Aim and Design </h2>
+This project investigates and builds an initial version of a tool to ingest, process and handle queries on the dblp academic citations dataset. This dataset covers papers from over 5000 conferences and hundreds of journals, and is a rich source for investigating creating novel tools for analyzing academic communities
+
+The main aims were to:
+
+· Develop text/citation processing tools to ingest raw information from the dplb dataset. This is a large XML file and will require careful processing to handle its scale.
+
+· Design a flexible database schema to store bibliographic information and the relationships between publications that are expressed as citations
+
+· Investigate, propose and prototype queries that can be asked of the data in the database. As the data naturally forms a graph, investigating graph analysis techniques will lead to some interesting approaches that have not been tried before on such data.
+
+· Prototype a query frontend to demonstrate the proposed queries. 
  
 <h2> What is Neo4j? </h2>
 Neo4j is a graph database management system developed by Neo Technology, Inc. Described by its developers as an ACID-compliant transactional database with native graph storage and processing, Neo4j is the most popular graph database according to db-engines.com.
