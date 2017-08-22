@@ -47,7 +47,14 @@ The repository https://github.com/Harshita27/AuthorGeneologyUI contains the fron
 
 <h2>How to run the application</h2>
 
-1. Database Creation: Create jar with main class as ParseInProceedings.java
+1. Database Creation: Run the jar at Jars/DBLP_GraphCreation.jar with the following arguments:
 
-2. Database Traversal: Create jar with main class as TraverseGraph.java
-By default these classes have the path set for ec2 instance which can be changed
+java -jar DBLP_GraphCreation.jar /path/tp/dblp/xml 
+
+The application currently creates the database on an ec2 instance, and the database path has been set to that.
+
+2. Database Traversal: Run the jar at Jars/DBLP_GraphTraversal.jar
+
+java -jar DBLP_GraphTraversal.jar
+
+This jar looks for the database stored at the ec2 location as specified in the previous step
