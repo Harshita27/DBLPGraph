@@ -38,8 +38,8 @@ Follow the link to visualize the graph in the neo4j browser:
 http://ec2-18-220-59-135.us-east-2.compute.amazonaws.com:7474/browser/
 For example, below is a screenshot of how the graph looks for the author "Sridhar Ramaswamy"
 
+[Alt text](/image/image.png?raw=true "Optional Title")
 
-[logo]: https://github.com/Harshita27/DBLPGraph/blob/master/image/image.png
 
 
 <h2>Front end to the graph database</h2>
