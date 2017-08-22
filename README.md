@@ -58,6 +58,7 @@ The repository https://github.com/Harshita27/AuthorGeneologyUI contains the fron
 
 
 <h2>How to run the application</h2>
+It is advised to get the database created in an ec2 instance because of the large size of the database.
 
 1. Database Creation: Run the jar at Jars/DBLP_GraphCreation.jar with the following arguments:
 
