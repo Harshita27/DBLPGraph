@@ -17,6 +17,8 @@ public class ParseInProceedings {
 		System.setProperty("jdk.xml.entityExpansionLimit", "0");
 		System.out.println("Start:"+ System.currentTimeMillis());
 		ReadXML reader = new ReadXML("abc");
-		reader.parseXML("/home/ec2-user/dblp.xml");
+		//reader.parseXML("/home/ec2-user/dblp.xml");
+		// args[0] to contain the path of the dblp.xml file
+		reader.parseXML(args[0]);
 	}
 }
