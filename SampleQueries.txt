@@ -1,0 +1,23 @@
+All articles that cite the author "authorName"
+MATCH (a:article)-[:CITES]->(b:article)-[:HAS]->(m) WHERE m.authorName = 'authorName' RETURN DISTINCT a
+
+All articles cited by author "authorName"
+MATCH (a:article)-[:CITES]-(b:article), (a:article)-[:HAS]->(m) WHERE m.authorName = 'authorName' RETURN DISTINCT b
+
+All articles by "authorName"
+MATCH (a:article)-[:HAS]->(m) WHERE m.authorName = 'authorName' RETURN DISTINCT a
+
+Articles with title containing the word  "articleTitleKeyword"
+MATCH (a:article)-[:HAS]-(m) WHERE a.title CONTAINS 'articleTitleKeyword' RETURN m
+
+Authors who published in "confName"
+MATCH (:confName { confName:'confName' })-[:PUBLISHES]->(n)-[:HAS]->(m) RETURN DISTINCT m.authorName
+
+All Authors who have co authored with "authorName"
+MATCH (:author { authorName: 'authorName' })-[:CO_AUTHOR]-(m) RETURN DISTINCT m.authorName
+
+Common co authors of two authors "auth1" and "auth2"
+MATCH (:author { authorName: 'auth1' })-[:CO_AUTHOR]-(m)-[:CO_AUTHOR]-(:author { authorName: 'auth2' }) RETURN DISTINCT m
+
+
+
