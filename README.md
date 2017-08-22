@@ -25,7 +25,7 @@ The main aims were to:
 <h2> What is Neo4j? </h2>
 Neo4j is a graph database management system developed by Neo Technology, Inc. Described by its developers as an ACID-compliant transactional database with native graph storage and processing, Neo4j is the most popular graph database according to db-engines.com.
 
-<h2> What graph the application creates? </h2>
+<h2> What kind of graph the application creates? </h2>
 For each article, the application parses the information to get the conference, author name, year of publication, title and the article key.
 it is essential to get a relationship between all these sets of information in order to analyze and visualize an authors conrtribution.
 Each of the information is modeled into nodes and properties.
