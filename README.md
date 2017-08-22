@@ -36,6 +36,11 @@ Each node is related to another node by some relationship type:
 The entire graph db is hosted on the ec2 instance. 
 Follow the link to visualize the graph in the neo4j browser: 
 http://ec2-18-220-59-135.us-east-2.compute.amazonaws.com:7474/browser/
+For example, below is a screenshot of how the graph looks for the author "Sridhar Ramaswamy"
+
+
+[logo]: https://github.com/Harshita27/DBLPGraph/blob/master/image/image.png
+
 
 <h2>Front end to the graph database</h2>
 The repository https://github.com/Harshita27/AuthorGeneologyUI contains the frontend web app to connect to the ec2 instance and fires up sample queries on the DBLP graph created.
