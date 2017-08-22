@@ -51,7 +51,8 @@ http://ec2-18-220-59-135.us-east-2.compute.amazonaws.com:7474/browser/
 
 [Screenshot of how the graph looks for the author "Sridhar Ramaswamy"](/image/image.png?raw=true "Optional Title")
 
-
+Query that was run:
+```MATCH (ca:confName)-[:PUBLISHES]->(b:article)-[:HAS]->(m) WHERE m.authorName = 'Sridhar Ramaswamy' RETURN ca , b, m```
 
 <h2>Front end to the graph database</h2>
 The repository https://github.com/Harshita27/AuthorGeneologyUI contains the frontend web app to connect to the ec2 instance and fires up sample queries on the DBLP graph created. This repository lists some example queries that you can run.
